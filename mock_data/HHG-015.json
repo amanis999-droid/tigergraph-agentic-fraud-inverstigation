@@ -1,0 +1,52 @@
+{
+  "case": {
+    "case_id": "HHG-015",
+    "trigger_type": "risk_score",
+    "customer_id": "C03042",
+    "card_id": "C03042-K1",
+    "flagged_transaction_id": "3464869",
+    "verdict": "uncertain",
+    "fraud_pattern": "card_not_present_fraud",
+    "risk_level": "medium",
+    "confidence": 0.62,
+    "exposure_amount": 599.94,
+    "evidence": [
+      {"type": "risk_signal", "description": "Detection model scored the $599.94 online transaction 3464869 at 0.77", "source": "transaction_history"},
+      {"type": "device_signal", "description": "Transaction used a device previously seen on this account, but from an unusual time-of-day pattern", "source": "device"},
+      {"type": "customer_response", "description": "Customer verification request sent; reply received was ambiguous, neither confirming nor denying recognition of the merchant", "source": "transaction_history"},
+      {"type": "graph_pattern", "description": "No shared-device or shared-region link to any other flagged entity", "source": "graph"}
+    ],
+    "similar_past_cases": [],
+    "reasoning": "The risk score is a single signal below the confident-block threshold, so verification was requested first per R1. The customer's reply did not clearly confirm or deny the transaction, and the known-device signal is offset by an unusual usage time, leaving the evidence genuinely conflicting. With exposure at $599.94 (over the $500 threshold) and the verdict still uncertain, policy R8 requires escalation to a human analyst rather than a further automated decision."
+  },
+  "sar": {
+    "required": false,
+    "reason": "Verdict not yet confirmed; case escalated to analyst before any SAR decision",
+    "summary": ""
+  },
+  "next_best_actions": {
+    "initial": {
+      "action": "VERIFY_WITH_CUSTOMER",
+      "approval_route": "auto",
+      "justification": "Policy R1: risk score alone (0.77, single signal, below the confident-action bar given no corroborating evidence) — verify with the customer first."
+    },
+    "final": {
+      "action": "ESCALATE_TO_ANALYST",
+      "approval_route": "auto",
+      "justification": "Policy R8: verdict remains uncertain and exposure ($599.94) exceeds $500, and the customer's reply was inconclusive — escalate to a human analyst with the full evidence set."
+    }
+  },
+  "evidence_requests": [
+    "Clarifying follow-up with the customer on the specific merchant name",
+    "Full device usage history for the prior 30 days"
+  ],
+  "stop_reason": "Evidence remains genuinely conflicting after the customer follow-up; policy requires escalation rather than a further automated decision at this exposure level.",
+  "tool_calls": [
+    "get_transaction_history(card_id=C03042-K1)",
+    "get_device_profile(transaction_id=3464869)",
+    "request_customer_verification(customer_id=C03042, transaction_id=3464869)",
+    "search_similar_cases(pattern=card_not_present_fraud)"
+  ],
+  "tokens": 4870,
+  "latency_s": 6.8
+}

@@ -1,0 +1,51 @@
+{
+  "case": {
+    "case_id": "HHG-006",
+    "trigger_type": "customer_report",
+    "customer_id": "C07297",
+    "card_id": "C07297-K1",
+    "flagged_transaction_id": "3476682",
+    "verdict": "fraud",
+    "fraud_pattern": "account_takeover",
+    "risk_level": "high",
+    "confidence": 0.95,
+    "exposure_amount": 482.12,
+    "evidence": [
+      {"type": "customer_report", "description": "Customer states: 'I never made this $482.12 purchase. Please check my card.'", "source": "transaction_history"},
+      {"type": "graph_pattern", "description": "Login to the account occurred from a new device shortly before the transaction, followed by a contact-detail change", "source": "graph"},
+      {"type": "device_signal", "description": "Device not previously associated with this customer's account", "source": "device"},
+      {"type": "prior_case", "description": "Same mixed-channel anomaly signature (new device login + contact change + purchase) confirmed as account takeover in 2 recent closed cases", "source": "prior_case"}
+    ],
+    "similar_past_cases": ["CC-4410", "CC-4522"],
+    "reasoning": "A customer denial combined with a new-device login immediately preceding a contact-detail change and the purchase is the account-takeover signature seen in prior confirmed cases. This is a direct customer denial (policy R2), not a weak single signal, so no additional verification step was required before blocking."
+  },
+  "sar": {
+    "required": false,
+    "reason": "Exposure ($482.12) is below the $1,000 threshold and no shared-device link to another customer was found",
+    "summary": ""
+  },
+  "next_best_actions": {
+    "initial": {
+      "action": "BLOCK_CARD",
+      "approval_route": "L1",
+      "justification": "Policy R2: customer denies the transaction — block the card. Exposure ($482.12) is ≤ $2,500, routing to L1. CREATE_CASE is also recommended alongside this action."
+    },
+    "final": {
+      "action": "BLOCK_CARD",
+      "approval_route": "L1",
+      "justification": "Account-takeover signature confirmed against 2 prior cases after reviewing login and contact-change history. Recommendation unchanged from initial — policy R2 block stands, still routed to L1."
+    }
+  },
+  "evidence_requests": [
+    "Account login and contact-detail change history for the 48 hours before the transaction"
+  ],
+  "stop_reason": "Customer denial plus a matching account-takeover signature against two confirmed prior cases is sufficient for a defensible block; exposure does not meet the SAR threshold.",
+  "tool_calls": [
+    "get_transaction_history(card_id=C07297-K1)",
+    "get_account_activity_log(customer_id=C07297)",
+    "get_device_profile(transaction_id=3476682)",
+    "search_similar_cases(pattern=account_takeover)"
+  ],
+  "tokens": 4590,
+  "latency_s": 6.2
+}

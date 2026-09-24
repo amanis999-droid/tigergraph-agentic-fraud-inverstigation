@@ -1,0 +1,51 @@
+{
+  "case": {
+    "case_id": "HHG-001",
+    "trigger_type": "risk_score",
+    "customer_id": "C12382",
+    "card_id": "C12382-K1",
+    "flagged_transaction_id": "3514030",
+    "verdict": "not_fraud",
+    "fraud_pattern": "none",
+    "risk_level": "low",
+    "confidence": 0.88,
+    "exposure_amount": 0.00,
+    "evidence": [
+      {"type": "risk_signal", "description": "Detection model scored the $77.07 transaction 3514030 (billing region 444) at 0.61", "source": "transaction_history"},
+      {"type": "customer_response", "description": "Customer confirmed travel to billing region 444 for the dates in question", "source": "transaction_history"},
+      {"type": "graph_pattern", "description": "No shared-device or shared-region links to any other flagged or fraud-confirmed entity", "source": "graph"},
+      {"type": "prior_case", "description": "No similar past case found for this customer or card", "source": "prior_case"}
+    ],
+    "similar_past_cases": [],
+    "reasoning": "The risk score alone is a single signal per policy R1, so the customer was asked to verify before any action was taken. The customer confirmed travel to the billing region, which fully explains the out-of-region signal. No other evidence in the graph corroborates fraud. Per policy R3, the case closes as legitimate."
+  },
+  "sar": {
+    "required": false,
+    "reason": "No fraud confirmed; SAR not applicable",
+    "summary": ""
+  },
+  "next_best_actions": {
+    "initial": {
+      "action": "VERIFY_WITH_CUSTOMER",
+      "approval_route": "auto",
+      "justification": "Policy R1: risk score alone (0.61, below 0.70) is a single signal — verify with the customer before any block."
+    },
+    "final": {
+      "action": "CLOSE_NO_FRAUD",
+      "approval_route": "auto",
+      "justification": "Policy R3: customer confirmed the transaction (explained by travel to the billing region). Close the alert as legitimate."
+    }
+  },
+  "evidence_requests": [
+    "Direct confirmation from customer on travel/location for the flagged billing region"
+  ],
+  "stop_reason": "Customer confirmation fully resolves the out-of-region signal; no further evidence needed.",
+  "tool_calls": [
+    "get_transaction_history(card_id=C12382-K1)",
+    "get_billing_region_history(customer_id=C12382)",
+    "search_similar_cases(customer_id=C12382)",
+    "request_customer_verification(customer_id=C12382, transaction_id=3514030)"
+  ],
+  "tokens": 3340,
+  "latency_s": 4.6
+}

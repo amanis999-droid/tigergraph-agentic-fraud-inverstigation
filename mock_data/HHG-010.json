@@ -1,0 +1,51 @@
+{
+  "case": {
+    "case_id": "HHG-010",
+    "trigger_type": "risk_score",
+    "customer_id": "C10434",
+    "card_id": "C10434-K1",
+    "flagged_transaction_id": "3506725",
+    "verdict": "fraud",
+    "fraud_pattern": "card_not_present_new_device",
+    "risk_level": "high",
+    "confidence": 0.93,
+    "exposure_amount": 1000.03,
+    "evidence": [
+      {"type": "risk_signal", "description": "Detection model scored the $1,000.03 online transaction 3506725 at 0.90", "source": "transaction_history"},
+      {"type": "device_signal", "description": "Transaction originated from a device never previously associated with card C10434-K1", "source": "device"},
+      {"type": "graph_pattern", "description": "Device profile shares a proxy/IP signature with a device linked to a confirmed fraud case in closed_cases_history", "source": "graph"},
+      {"type": "prior_case", "description": "Similar new-device CNP pattern confirmed as fraud on a different customer's card in the same week", "source": "prior_case"}
+    ],
+    "similar_past_cases": ["CC-3182", "CC-3204"],
+    "reasoning": "The transaction amount and new-device signal alone (risk_score 0.90) are a single signal under policy R1, so step-up authentication was requested first. The device's shared proxy signature with a confirmed prior fraud case raised confidence to 0.93, past the threshold for a defensible block. Exposure of $1,000.03 exceeds the $1,000 SAR threshold under policy 3a."
+  },
+  "sar": {
+    "required": true,
+    "reason": "Confirmed fraud with exposure exceeding $1,000 and a shared device-profile link to a prior confirmed case (policy 3a)",
+    "summary": "Card-not-present fraud from a new device on card C10434-K1: a $1,000.03 online transaction (3506725) matched a device profile linked to a previously confirmed fraud case. Card blocked; case opened; report filed per policy R2/3a."
+  },
+  "next_best_actions": {
+    "initial": {
+      "action": "STEP_UP_AUTH",
+      "approval_route": "auto",
+      "justification": "Policy R1: the risk score is a single signal; require step-up authentication before any block decision."
+    },
+    "final": {
+      "action": "BLOCK_CARD",
+      "approval_route": "L1",
+      "justification": "Step-up authentication failed and the new-device signal matched a confirmed prior fraud case. Policy R2: block and create a case; exposure ($1,000.03) is ≤ $2,500 so this routes to L1. FILE_REPORT and CREATE_CASE are also recommended alongside this action per policy 3a (exposure exceeds $1,000)."
+    }
+  },
+  "evidence_requests": [
+    "Step-up authentication result for card C10434-K1"
+  ],
+  "stop_reason": "Step-up failure plus a confirmed-case device match provide sufficient, defensible evidence for a block, case and report; no further evidence needed.",
+  "tool_calls": [
+    "get_transaction_history(card_id=C10434-K1)",
+    "get_device_profile(transaction_id=3506725)",
+    "get_shared_device_cluster(card_id=C10434-K1)",
+    "search_similar_cases(pattern=card_not_present_new_device)"
+  ],
+  "tokens": 5210,
+  "latency_s": 7.1
+}

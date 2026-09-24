@@ -1,0 +1,51 @@
+{
+  "case": {
+    "case_id": "HHG-014",
+    "trigger_type": "analyst_request",
+    "customer_id": "C13487",
+    "card_id": "C13487-K1",
+    "flagged_transaction_id": "3478561",
+    "verdict": "fraud",
+    "fraud_pattern": "undocumented",
+    "risk_level": "high",
+    "confidence": 0.81,
+    "exposure_amount": 448.50,
+    "evidence": [
+      {"type": "analyst_note", "description": "Analyst flagged that several cards this month show purchases from the same unusual device profile", "source": "transaction_history"},
+      {"type": "graph_pattern", "description": "Device profile linked to transaction 3478561 is shared across 4 separate customer cards within a 6-day window", "source": "graph"},
+      {"type": "graph_pattern", "description": "None of the 4 linked cards share a billing region, email domain, or prior relationship — device is the only common element", "source": "graph"},
+      {"type": "prior_case", "description": "No matching prior case for this exact device-sharing pattern; does not fit any of the 5 documented fraud patterns", "source": "prior_case"}
+    ],
+    "similar_past_cases": [],
+    "reasoning": "This activity does not cleanly match card testing, CNP, out-of-region, or account takeover: the shared element across unrelated customers is a single device profile, which is closer to a coordinated fraud ring than any documented pattern. Per policy R9, this is classified as undocumented rather than forced into an existing category. The shared-device evidence across 4 distinct cards meets the bar under R6 for treating this as a coordinated origin."
+  },
+  "sar": {
+    "required": true,
+    "reason": "Coordinated/undocumented pattern connecting multiple customers through a shared device (policy R9 and 3a)",
+    "summary": "A single device profile was used across 4 unrelated customer cards within a 6-day window, none sharing any other connection. This does not match a documented fraud pattern and is reported as coordinated, undocumented activity. All 4 connected cards placed under monitoring; case opened; report filed."
+  },
+  "next_best_actions": {
+    "initial": {
+      "action": "CREATE_CASE",
+      "approval_route": "auto",
+      "justification": "Policy 3a: open a case once fraud probability reaches 0.30 to begin tracking the analyst-flagged pattern across cards."
+    },
+    "final": {
+      "action": "MONITOR_CONNECTED_CARDS",
+      "approval_route": "auto",
+      "justification": "Policy R6/R9: the shared device profile links 4 cards with no other common element — name the shared device, place all connected cards under monitoring, and (per R9) FILE_REPORT and ESCALATE_TO_ANALYST are also recommended alongside this action since the pattern is coordinated and undocumented."
+    }
+  },
+  "evidence_requests": [
+    "Full transaction list for all 4 cards linked to the shared device profile"
+  ],
+  "stop_reason": "The shared-device link across 4 unrelated cards is strong, graph-confirmed evidence; sufficient to act and escalate without further evidence gathering.",
+  "tool_calls": [
+    "get_device_profile(transaction_id=3478561)",
+    "get_shared_device_cluster(card_id=C13487-K1)",
+    "get_connected_cards(device_profile=DEV-SHARED-118)",
+    "search_similar_cases(pattern=undocumented)"
+  ],
+  "tokens": 6120,
+  "latency_s": 8.9
+}
