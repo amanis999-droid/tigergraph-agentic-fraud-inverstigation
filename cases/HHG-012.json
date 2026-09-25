@@ -1,5 +1,5 @@
 {
-  "case_id": "HHG-001",
+  "case_id": "HHG-012",
   "case": {
     "status": "open",
     "verdict": "uncertain",
@@ -13,13 +13,13 @@
     "exposure_usd": 0.0,
     "evidence": [
       {
-        "claim": "Case-pack trigger: Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide.",
+        "claim": "Case-pack trigger: Real-time model scored transaction 3553342 ($30.91, in billing region 494.0) at 0.55. Review and decide.",
         "source": "document",
         "ref": "case_pack.trigger_text",
         "entity_ids": [
-          "3514030",
-          "C12382-K1",
-          "C12382"
+          "3553342",
+          "C05876-K2",
+          "C05876"
         ]
       }
     ],
@@ -73,5 +73,5 @@
   "stop_reason": "Investigation remains open pending the simulated verification response (Section 6).",
   "tool_calls": 0,
   "tokens": 0,
-  "latency_s": 0.221
+  "latency_s": 0.0
 }

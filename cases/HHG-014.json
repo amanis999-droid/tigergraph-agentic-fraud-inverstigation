@@ -1,0 +1,61 @@
+{
+  "case_id": "HHG-014",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.12,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Case-pack analyst request: Analyst request: several cards this month show purchases from the same unusual device profile. Review transaction 3478561 on card C13487-K1 and look for related activity.",
+        "source": "document",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3478561",
+          "C13487-K1",
+          "C13487"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Evidence was gathered through the configured graph-tool interface. Fraud probability is sufficiently low and supported by the evidence.",
+    "written_to_graph": false,
+    "graph_case_id": ""
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: decision is weak and the transaction is likely legitimate."
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: decision is weak and the transaction is likely legitimate."
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "sar": {
+    "file": false,
+    "reason": "No report because the case is not assessed as fraud.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
+  },
+  "stop_reason": "Fraud probability is sufficiently low and supported by the evidence.",
+  "tool_calls": 0,
+  "tokens": 0,
+  "latency_s": 0.0
+}

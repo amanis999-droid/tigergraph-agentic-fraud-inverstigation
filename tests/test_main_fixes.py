@@ -1,6 +1,17 @@
 from __future__ import annotations
 
+import csv
+
 from main import _clean_evidence, _clean_prior_cases
+
+
+def test_case_pack_has_20_cases():
+    with open("case_pack.csv", newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 20
+    assert [row["case_id"] for row in rows[:3]] == ["HHG-001", "HHG-002", "HHG-003"]
+    assert rows[-1]["case_id"] == "HHG-020"
 
 
 def test_clean_evidence_removes_placeholder_stubs():

@@ -1,10 +1,10 @@
 {
-  "case_id": "HHG-001",
+  "case_id": "HHG-002",
   "case": {
     "status": "open",
     "verdict": "uncertain",
-    "fraud_probability": 0.24,
-    "pattern": "none",
+    "fraud_probability": 0.48,
+    "pattern": "card_not_present_fraud",
     "pattern_description": "",
     "affected_txn_ids": [],
     "first_suspicious_txn_id": "",
@@ -13,13 +13,23 @@
     "exposure_usd": 0.0,
     "evidence": [
       {
-        "claim": "Case-pack trigger: Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide.",
+        "claim": "Case-pack trigger: Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide.",
         "source": "document",
         "ref": "case_pack.trigger_text",
         "entity_ids": [
-          "3514030",
-          "C12382-K1",
-          "C12382"
+          "3478782",
+          "C11891-K1",
+          "C11891"
+        ]
+      },
+      {
+        "claim": "The flagged transaction 3478782 has a high model score of 0.79.",
+        "source": "graph",
+        "ref": "transactions.csv",
+        "entity_ids": [
+          "3478782",
+          "C11891-K1",
+          "C11891"
         ]
       }
     ],
@@ -73,5 +83,5 @@
   "stop_reason": "Investigation remains open pending the simulated verification response (Section 6).",
   "tool_calls": 0,
   "tokens": 0,
-  "latency_s": 0.221
+  "latency_s": 0.0
 }
