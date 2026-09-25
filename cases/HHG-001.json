@@ -1,0 +1,77 @@
+{
+  "case_id": "HHG-001",
+  "case": {
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.24,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Case-pack trigger: Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide.",
+        "source": "document",
+        "ref": "case_pack.trigger_text",
+        "entity_ids": [
+          "3514030",
+          "C12382-K1",
+          "C12382"
+        ]
+      }
+    ],
+    "similar_prior_cases": [],
+    "summary": "Evidence was gathered through the configured graph-tool interface. Investigation remains open pending the simulated verification response (Section 6).",
+    "written_to_graph": false,
+    "graph_case_id": ""
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 0,
+      "assumed_response": "No response is provided in the benchmark; assume no reply within 24 hours."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: insufficient certainty to block or close."
+      },
+      {
+        "action": "MONITOR_CARD",
+        "route": "auto",
+        "reason": "R4: keep the card under watch while evidence is gathered."
+      }
+    ],
+    "final": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: insufficient certainty to block or close."
+      },
+      {
+        "action": "MONITOR_CARD",
+        "route": "auto",
+        "reason": "R4: keep the card under watch while evidence is gathered."
+      }
+    ],
+    "what_changed": "The final actions reflect the documented no-reply assumption."
+  },
+  "sar": {
+    "file": false,
+    "reason": "No report because the case is not assessed as fraud.",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
+  },
+  "stop_reason": "Investigation remains open pending the simulated verification response (Section 6).",
+  "tool_calls": 0,
+  "tokens": 0,
+  "latency_s": 0.242
+}

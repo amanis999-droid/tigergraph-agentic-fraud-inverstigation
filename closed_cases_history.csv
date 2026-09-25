@@ -1,0 +1,3 @@
+case_id,customer_id,card_id,opened_at,closed_at,outcome,pattern,first_fraud_txn_id,txn_ids,n_txns,exposure_usd,connected_card_ids,actions_taken,report_filed,analyst_notes
+CC-100,C12382,C12382-K1,2016-07-04 10:00:00,2016-07-05 09:50:00,confirmed_fraud,card_not_present_fraud,3514030,3514030|3514031|3514032,3,190.0,"C12382-K2","BLOCK_CARD|FILE_REPORT",true,"Online burst with customer denial."
+CC-101,C08623,C08623-K2,2016-08-04 11:00:00,2016-08-06 09:30:00,confirmed_fraud,account_takeover,3530164,3530164|3530165|3530166,3,240.0,"C08623-K1","BLOCK_CARD|FILE_REPORT",true,"Shared device and customer denial."

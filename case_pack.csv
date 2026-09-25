@@ -1,0 +1,5 @@
+case_id,opened_at,trigger_type,trigger_text,flagged_txn_id,card_id,customer_id,risk_score
+HHG-001,2016-12-05 01:55:28,risk_score,"Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide.",3514030,C12382-K1,C12382,0.61
+HHG-002,2016-11-22 23:27:07,risk_score,"Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide.",3478782,C11891-K1,C11891,0.79
+HHG-003,2016-12-10 15:01:21,customer_report,"Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.",3530164,C08623-K2,C08623,
+HHG-004,2016-12-29 07:53:54,customer_report,"Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.",3583227,C08106-K1,C08106,
