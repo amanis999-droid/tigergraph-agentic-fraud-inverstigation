@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "description": "Local policy and reasoning chunks plus regulatory sources for TigerGraph vector retrieval.",
+  "chunks": [
+    {
+      "document_id": "README",
+      "chunk_id": "README:1",
+      "title": "TigerGraph \u00d7 Hacker House Goa \u2014 Fraud Investigation Dataset (IEEE-CIS edition)",
+      "source": "document",
+      "ref": "README#tigergraph-\u00d7-hacker-house-goa-\u2014-fraud-investigation-dataset-(ieee-cis-edition)",
+      "text": "# TigerGraph \u00d7 Hacker House Goa \u2014 Fraud Investigation Dataset (IEEE-CIS edition)\n\nSix months of card transactions from the **IEEE-CIS Fraud Detection** dataset, published by Vesta Corporation, with **every original row and every original column kept**. Two things changed: the yes/no fraud label is gone, and every transaction carries a **risk score** from the bank's detection model instead. On top sit the things an investigation needs: customers, a real calendar, a channel, the bank's closed cases, and the 20 cases you'll be judged on.\n\nThe data is anonymized by its publisher. No real people."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:2",
+      "title": "The task",
+      "source": "document",
+      "ref": "README#the-task",
+      "text": "## The task\n\nLoad the data into TigerGraph. Build an agent that takes a case from the case pack, investigates it using the graph and the closed cases, works out **what kind of fraud it is** (if any), **how far it goes**, and **what to do next** under the Fraud Policy section below, and knows when it needs more evidence before deciding. Run it on all 20 cases.\n\nFor each case your agent produces **three things**, in one answer file (format in the Answer Format section below):\n\n1. **A case**: the internal investigation record. Status, verdict, pattern, evidence, affected transactions, connected cards, exposure, and the past cases you retrieved. Write it into the graph too. That is your case memory: the next investigation should be able to find it.\n2. **A suspicious activity report**, when the policy calls for one: the regulatory filing, written so it stands on its own.\n3. **The next best action**: what the bank should do and who must approve it, both before and after any evidence your agent asked for. The recommendation is allowed to change as evidence comes in. Show that it did.\n\nSubmit the 20 answer files. We score them against an answer key you don't have.\n\n**Optional.** If your agent also monitors the exam period on its own, picks up alerts from the risk scores, and investigates beyond the 20 cases, put those in a separate folder. They count toward Innovation, not accuracy."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:3",
+      "title": "Start here: your first two hours",
+      "source": "document",
+      "ref": "README#start-here:-your-first-two-hours",
+      "text": "## Start here: your first two hours\n\n1. **Read this document once, top to bottom.** Don't skip the Answer Format; it's what you're graded on.\n2. **Get a graph database.** Sign up at https://savanna.tgcloud.io and create a workspace, or install Community Edition from https://dl.tigergraph.com. Both are free. On Savanna, stop the workspace when you're not using it.\n3. **Create and load the graph.** The executable schema and load job are in `tigergraph/`. Run `python scripts/prepare_graph_data.py` first, then apply `tigergraph/schema.gsql` and `tigergraph/load_jobs.gsql`. The detailed mapping is in `tigergraph/README.md`.\n4. **Connect TigerGraph MCP** so your agent can query the graph as tools: https://github.com/tigergraph/tigergraph-mcp\n5. **Prepare retrieval sources.** Run `python scripts/build_retrieval_manifest.py`; it creates local chunks for the README and rubric and records the regulatory URLs to download into the graph vector store.\n6. **Investigate one case by hand**, before writing any agent code. Pick one from the table at the bottom. Look up the customer's history, the device, the region, the closed cases. Decide what you'd do. Now you know what the agent has to do.\n7. **Write your first answer file** for that case, following the example in the Answer Format section. Then automate it.\n\nQuestions go to the TigerGraph Discord: https://discord.com/invite/4cc7SNqRf"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:4",
+      "title": "Glossary",
+      "source": "document",
+      "ref": "README#glossary",
+      "text": "## Glossary\n\n| Term | Meaning here |\n|---|---|\n| **Risk score** | A number from 0 to 1 the bank's model attached to every transaction. High means \"look at this.\" It is often wrong in both directions. Never treat it as the answer |\n| **Closed case** | An investigation the bank already finished, July to October. Either confirmed fraud or cleared as a false alarm. The only place the truth is written down |\n| **Case pack** | The 20 alerts you investigate, all from November and December. Your exam |\n| **Trigger** | Why an alert exists: the model scored it high, a customer complained, or an analyst asked |\n| **Pattern** | The kind of fraud. Five are documented below. Some in the data are not |\n| **Channel** | `in_person` (product code W, no device record) or `online` (all other product codes, device record present) |\n| **Identity record** | The device and connection details Vesta captured for online transactions: device type and model, OS, browser, screen, proxy flag, and encoded ratings |\n| **Billing region** | `addr1`: an anonymized code for where the card is billed. `addr2` is the country code; 87 is the home country |\n| **Exposure** | Total dollars in the fraud episode you identified |\n| **Case** (as a deliverable) | The bank's internal record of your investigation. Part 1 of your answer |\n| **SAR** | Suspicious Activity Report. The regulatory filing a bank must make for confirmed or strongly suspected fraud above certain thresholds. Part 2 of your answer, only when the policy calls for it |\n| **Next best action** | What the bank should do now, and who has to approve it. Part 3 of your answer |\n| **Approval route** | `auto` the agent may act alone; `L1` a team lead must approve; `L2` a fraud manager must approve |\n| **MCP** | Model Context Protocol. How your agent calls TigerGraph as a set of tools |\n| **GraphRAG** | Retrieving evidence from the graph and text from documents, and giving both to the LLM to reason over, instead of raw data |"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:5",
+      "title": "Files in this folder",
+      "source": "document",
+      "ref": "README#files-in-this-folder",
+      "text": "## Files in this folder\n\n| File | What it is |\n|---|---|\n| `README.md` | This document: the task, the data, the known patterns, the regulatory references, the fraud policy, the answer format, and the 20 cases |\n| `transactions.csv` | 590,742 transactions, all 393 original Vesta columns plus `customer_id`, `ts`, `channel`, `risk_score`. No fraud flag. About 708 MB |\n| `identity.csv` | 144,432 identity records, all 41 original columns, joined to transactions on `TransactionID`. Online transactions only |\n| `closed_cases_history.csv` | 5,565 finished investigations, July to October. 4,665 confirmed fraud, 900 cleared |\n| `case_pack.csv` | The 20 exam cases with their trigger. Also listed at the bottom of this document |\n| `tigergraph/schema.gsql` | Executable TigerGraph vertex and edge definitions used by the MCP adapter |\n| `tigergraph/load_jobs.gsql` | TigerGraph loading job for the prepared vertex and edge CSVs |\n| `scripts/prepare_graph_data.py` | Streaming conversion of the benchmark CSVs into graph-loadable files |\n| `scripts/build_retrieval_manifest.py` | Builds local policy/rubric chunks and a regulatory-source manifest for vector retrieval |\n\nUTF-8 CSV, header row, amounts in USD. `transactions.csv` joins to `identity.csv` on `TransactionID`."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:6",
+      "title": "The original columns, as Vesta describes them",
+      "source": "document",
+      "ref": "README#the-original-columns,-as-vesta-describes-them",
+      "text": "## The original columns, as Vesta describes them\n\nVesta published the column groups but not the individual definitions. Use them as signals, and be honest in your evidence about what a column is.\n\n| Group | Columns | Meaning |\n|---|---|---|\n| `TransactionID`, `TransactionDT`, `TransactionAmt` | 3 | ID, seconds from the dataset start, amount in USD |\n| `ProductCD` | 1 | Product code: `W`, `C`, `H`, `R`, `S`. `W` transactions have no identity record and are treated as in person |\n| `card1` to `card6` | 6 | Card details. `card4` is the network (visa, mastercard, american express, discover), `card6` the type (credit, debit). The others are issuer codes |\n| `addr1`, `addr2` | 2 | Billing region and billing country, as codes |\n| `dist1`, `dist2` | 2 | Distances between two unnamed points, when known |\n| `P_emaildomain`, `R_emaildomain` | 2 | Purchaser and recipient email domains |\n| `C1` to `C14` | 14 | Counts, such as how many addresses or phones are associated with the card. Unnamed individually |\n| `D1` to `D15` | 15 | Time deltas in days, such as days since the previous transaction. Unnamed individually |\n| `M1` to `M9` | 9 | Match flags, such as whether the name on the card matches the address |\n| `V1` to `V339` | 339 | Vesta's engineered features: ranking, counting, and relationships between entities. Unnamed |\n| `id_01` to `id_11` (identity) | 11 | Encoded ratings: device rating, IP-domain rating, proxy rating, login counts, time on page |\n| `id_12` to `id_38` (identity) | 27 | Categorical identity fields. Readable ones: `id_15` (device New / Found), `id_23` (proxy: transparent, anonymous, hidden), `id_30` (OS), `id_31` (browser), `id_33` (screen), `id_34` (match status) |\n| `DeviceType`, `DeviceInfo` (identity) | 2 | mobile or desktop; device or platform description, e.g. `SAMSUNG SM-G935F Build/NRD90M` |"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:7",
+      "title": "The columns we added",
+      "source": "document",
+      "ref": "README#the-columns-we-added",
+      "text": "## The columns we added\n\n| Column | Meaning |\n|---|---|\n| `customer_id` | e.g. `C01234`. Derived from the card issuer field; one customer can have several cards. Card IDs in the cases look like `C01234-K1` |\n| `ts` | Real timestamp, `YYYY-MM-DD HH:MM:SS`, from July 2 to December 31, 2016 |\n| `channel` | `in_person` or `online` |\n| `risk_score` | 0 to 1 from the bank's detection model. **An input, not an answer.** Above 0.7, most flagged transactions turn out to be legitimate. Some fraud scores near zero |\n\n`TransactionID`, `card1`, `TransactionDT`, and `TransactionAmt` were disguised (new IDs, small time and amount offsets) so answers cannot be looked up in the public file. Everything else is untouched."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:8",
+      "title": "`closed_cases_history.csv`",
+      "source": "document",
+      "ref": "README#`closed_cases_history.csv`",
+      "text": "## `closed_cases_history.csv`\n\n`case_id`, `customer_id`, `card_id`, `opened_at`, `closed_at`, `outcome` (`confirmed_fraud` / `cleared`), `pattern`, `first_fraud_txn_id`, `txn_ids` (pipe-separated), `n_txns`, `exposure_usd`, `connected_card_ids`, `actions_taken`, `report_filed`, `analyst_notes`\n\nPatterns are the five below, plus `undocumented` for a few cases the analysts confirmed as fraud but could not match to a known pattern. Read those notes carefully. Cleared cases have `pattern` = `none` and say why the alert was a false alarm.\n\nThis file is both your labeled history and your agent's starting memory: retrieve similar past cases when a new alert resembles an old one, cite them in `similar_prior_cases`, and add your own cases to the graph as you close them."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:9",
+      "title": "The case pack",
+      "source": "document",
+      "ref": "README#the-case-pack",
+      "text": "## The case pack\n\n`case_id`, `opened_at`, `trigger_type` (`risk_score` / `customer_report` / `analyst_request`), `trigger_text`, `flagged_txn_id`, `card_id`, `customer_id`, `risk_score` (filled only for risk-score triggers)\n\nThe flagged transaction is where the alert fired. It is not necessarily where the fraud started, and it may not be fraud at all."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:10",
+      "title": "The five known fraud patterns",
+      "source": "document",
+      "ref": "README#the-five-known-fraud-patterns",
+      "text": "## The five known fraud patterns\n\nThese are the patterns the bank's analysts recognize. **They are not the only patterns in the data.** Noticing activity that fits none of them, describing it in your own words, and recommending a defensible action is scored.\n\n**1. Card testing.** A stolen card number is checked before use: three or more tiny online authorizations, often under $5, then a larger purchase. Confirmed by the sequence itself. Policy R5.\n\n**2. Card-not-present fraud.** The number is used online without the card. Amounts and products that don't fit the cardholder's history, often in a burst of two to four within 48 hours. On its own, one unusual online purchase is ambiguous: verify. Policy R1 to R4.\n\n**3. Card-not-present fraud from a new device.** Same as above, with the identity record marking the device as `New` for this account, sometimes behind a proxy. Stronger than pattern 2, still not proof: people buy new phones.\n\n**4. Out-of-region use.** Card-present purchases in a billing region the cardholder has no history in, while their normal activity continues at home. Several days of purchases in one new region is a trip, not a clone. Policy R2, R3.\n\n**5. Account takeover.** Mixed-channel activity inconsistent with the cardholder, often with device and match-flag anomalies, pointing to stolen credentials rather than a stolen number."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:11",
+      "title": "Regulatory references",
+      "source": "document",
+      "ref": "README#regulatory-references",
+      "text": "## Regulatory references\n\nPublic documents from US and international regulators on fraud typologies, red flags, and how investigations and suspicious activity reports must be written. Load the ones you find useful into TigerGraph's vector store alongside the closed cases and the policy.\n\n**FinCEN (US Treasury)**\n- [SAR Filing FAQs, October 2025](https://www.fincen.gov/system/files/2025-10/SAR-FAQs-October-2025.pdf)\n- [SAR Narrative Guidance](https://www.fincen.gov/system/files/shared/sar_guidance_narrative.pdf): the standard for your `sar.narrative`\n- [Preparing a Complete and Sufficient SAR Narrative](https://www.fincen.gov/system/files/shared/sarnarrcompletguidfinal_112003.pdf)\n- [SAR Supporting Documentation (FIN-2007-G003)](https://www.fincen.gov/system/files/shared/fin-2007-g003.pdf)\n- [SAR Activity Review: Trends, Tips and Issues](https://www.fincen.gov/sites/default/files/sar_report/sar_tti_19.pdf)\n- [Advisory on Account Takeover Activity](https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2011-a016)\n- [Advisory on Imposter Scams and Money Mule Schemes](https://www.fincen.gov/system/files/advisory/2020-07-07/Advisory_%20Imposter_and_Money_Mule_COVID_19_508_FINAL.pdf)\n- [Identity-Related Suspicious Activity, 2021](https://www.fincen.gov/system/files/shared/FTA_Identity_Final508.pdf)\n\n**FATF**\n- [Illicit Financial Flows from Cyber-Enabled Fraud](https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Illicit-financial-flows-cyber-enabled-fraud.pdf.coredownload.inline.pdf)\n- [Money Laundering Using New Payment Methods](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Reportonnewpaymentmethods.html)\n- [Professional Money Laundering](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Professional-money-laundering.html)\n- [Money Laundering through Remittance and Currency Exchange Providers](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Moneylaunderingthroughmoneyremittanceandcurrencyexchangeproviders.html)\n- [Trade-Based Money Laundering](https://www.fatf-gafi.org/en/publications/Methodsandtrends/Trade-based-money-laundering-trends-and-developments.html)\n- [International Co-operation on ML Detection, Investigation and Prosecution](https://www.fatf-gafi.org/en/publications/Methodsandtrends/international-cooperation-against-money-laundering.html)\n\n**FFIEC**\n- [Money Laundering and Terrorist Financing Red Flags](https://bsaaml.ffiec.gov/manual/Appendices/07)\n- [Suspicious Activity Reporting](https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04)\n\n**OFAC**\n- [Specially Designated Nationals list](https://www.treasury.gov/ofac/downloads/sdnlist.pdf)"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:12",
+      "title": "Things to know",
+      "source": "document",
+      "ref": "README#things-to-know",
+      "text": "## Things to know\n\n- **A risk score is a reason to look.** Never a verdict.\n- **Half the cases are legitimate.** Many look suspicious. An agent that blocks everything scores badly.\n- **The known patterns are not the only ones.** Some activity in this data fits none of the five. Noticing it and describing it in your own words is scored.\n- **Devices and regions connect people.** A device profile or a billing region shared across many cards in a short window is worth a look. Some cases can only be solved by asking what happened on *other* cards.\n- **The V, C, D, M and numeric id columns are real model features with no names.** You may use them as signals. Say so in your evidence rather than pretending to know what V127 means.\n- **Customer and analyst replies are not provided.** If your agent asks the customer or requests step-up authentication, simulate the response in your own system and record what you assumed in `evidence_requests`."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:13",
+      "title": "Rules",
+      "source": "document",
+      "ref": "README#rules",
+      "text": "## Rules\n\n- Use the provided data as the common benchmark. You may extend it with your own data.\n- **Do not use the original public IEEE-CIS / Kaggle files to recover outcomes.** IDs, times, and amounts here have been transformed. Doing so is disqualification.\n- Every ID in your answer files must exist in this dataset."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:14",
+      "title": "Suggested graph schema",
+      "source": "document",
+      "ref": "README#suggested-graph-schema",
+      "text": "## Suggested graph schema\n\nStart here, then change it. Schema design is part of your engineering.\n\n**Vertices:** `Customer`, `Card`, `Transaction`, `DeviceProfile` (DeviceInfo + OS + browser + screen), `EmailDomain`, `BillingRegion`, `ClosedCase`\n\n**Edges:**\n- `Customer` \u2192 `OWNS` \u2192 `Card`\n- `Card` \u2192 `MADE` \u2192 `Transaction`\n- `Transaction` \u2192 `FROM_DEVICE` \u2192 `DeviceProfile` (online only, from `identity.csv`)\n- `Transaction` \u2192 `PURCHASER_EMAIL` \u2192 `EmailDomain`\n- `Transaction` \u2192 `BILLED_IN` \u2192 `BillingRegion` (from `addr1`)\n- `Transaction` \u2192 `NEXT` \u2192 `Transaction` (order by `ts` within a card)\n- `ClosedCase` \u2192 `INVOLVES` \u2192 `Transaction`, `ClosedCase` \u2192 `ON_CARD` \u2192 `Card`, `ClosedCase` \u2192 `CONNECTED_TO` \u2192 `Card`\n\nLoad the closed-case narratives, this README's pattern section, the policy, and the regulatory documents into TigerGraph vector search for retrieval."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:15",
+      "title": "Attribution",
+      "source": "document",
+      "ref": "README#attribution",
+      "text": "## Attribution\n\nIEEE-CIS Fraud Detection dataset, Vesta Corporation, via the IEEE Computational Intelligence Society. Customers, calendar, channel, risk scores, closed cases, and the case pack were added by TigerGraph for the Hacker House Goa 2026 task. A small number of rows were added to seed investigation exercises.\n\n---"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:16",
+      "title": "Fraud Policy",
+      "source": "document",
+      "ref": "README#fraud-policy",
+      "text": "# Fraud Policy\n\nVersion 1.0. This is the policy your agent operates under. Action names and approval routes in your case files must use the exact identifiers below."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:17",
+      "title": "0. What the agent starts with",
+      "source": "document",
+      "ref": "README#0.-what-the-agent-starts-with",
+      "text": "### 0. What the agent starts with\n\nEvery transaction carries a `risk_score` between 0 and 1 from the bank's detection model. The model is useful and imperfect: many high scores are legitimate, and some fraud scores low. A score is a reason to look, never a verdict. The only confirmed outcomes are in the closed cases."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:18",
+      "title": "1. Actions",
+      "source": "document",
+      "ref": "README#1.-actions",
+      "text": "### 1. Actions\n\n| Action | What it does | Customer impact |\n|---|---|---|\n| `ALLOW_TRANSACTION` | Let the flagged transaction stand | None |\n| `DECLINE_TRANSACTION` | Decline the flagged authorization only. Card stays active | Low |\n| `MONITOR_CARD` | Card stays active; raise monitoring sensitivity for 72 hours | None |\n| `MONITOR_CONNECTED_CARDS` | Put other cards linked to the same device profile, region cluster, or ring under monitoring | None |\n| `WARN_CUSTOMER` | Send an informational message (e.g. a recurring charge reminder, a security tip) | None |\n| `VERIFY_WITH_CUSTOMER` | Ask the cardholder whether they made the transaction. Card stays active pending reply | Low |\n| `STEP_UP_AUTH` | Require a one-time passcode or app confirmation before further activity | Low |\n| `BLOCK_CARD` | Block this card and reissue | High |\n| `BLOCK_ALL_CARDS` | Block every card the customer holds | Very high |\n| `GENERATE_REPORT` | Write up the investigation for the internal record, without opening a case | None |\n| `CREATE_CASE` | Open an internal fraud case with the evidence attached, and write it to the graph. See 3a | None |\n| `FILE_REPORT` | File a suspicious activity report with the regulator. See 3a | None |\n| `ESCALATE_TO_ANALYST` | Hand the case to a human analyst with the evidence | None |\n| `CLOSE_NO_FRAUD` | Close the alert as legitimate | None |\n\nAn agent may recommend several actions for one case. Order them by what happens first."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:19",
+      "title": "2. Approval routing",
+      "source": "document",
+      "ref": "README#2.-approval-routing",
+      "text": "### 2. Approval routing\n\n| Route | Applies to |\n|---|---|\n| `auto` | `ALLOW_TRANSACTION`, `MONITOR_CARD`, `MONITOR_CONNECTED_CARDS`, `WARN_CUSTOMER`, `VERIFY_WITH_CUSTOMER`, `STEP_UP_AUTH`, `GENERATE_REPORT`, `CREATE_CASE`, `ESCALATE_TO_ANALYST`, `CLOSE_NO_FRAUD` |\n| `L1` (team lead) | `DECLINE_TRANSACTION`; `BLOCK_CARD` when exposure \u2264 $2,500 |\n| `L2` (fraud manager) | `BLOCK_CARD` when exposure > $2,500; `BLOCK_ALL_CARDS` always; `FILE_REPORT` always |\n\nThe agent recommends. Only `auto` actions may be executed by the agent. `L1` and `L2` actions are recommended with the route stated and wait for a human."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:20",
+      "title": "3. Rules",
+      "source": "document",
+      "ref": "README#3.-rules",
+      "text": "### 3. Rules\n\n**R1. Verify before you block on a weak signal.** If the case rests on a single signal (including a risk score alone) and your assessed fraud probability is below 0.70, recommend `VERIFY_WITH_CUSTOMER` or `STEP_UP_AUTH` before any block. Blocking a legitimate customer on one signal is a policy breach.\n\n**R2. Customer denies the transaction.** Recommend `BLOCK_CARD` and `CREATE_CASE`. Add `FILE_REPORT` if exposure exceeds $1,000 or the case connects to a shared device profile or another card's fraud.\n\n**R3. Customer confirms the transaction.** Recommend `CLOSE_NO_FRAUD`. Note the confirmation in the case file.\n\n**R4. No reply within 24 hours.** Recommend `MONITOR_CARD` and `DECLINE_TRANSACTION` for pending authorizations. Escalate if exposure exceeds $500.\n\n**R5. Card testing.** Three or more small online authorizations on one card within an hour, followed by a larger purchase: recommend `DECLINE_TRANSACTION` and `STEP_UP_AUTH`. If a purchase over $100 has already cleared, recommend `BLOCK_CARD`.\n\n**R6. Shared origin.** When several cards show fraud from the same device profile, the same billing region, or the same recipient email in one window, name the shared element, recommend `CREATE_CASE` and `FILE_REPORT`, and `MONITOR_CONNECTED_CARDS` for every card that shares it.\n\n**R7. Disputed but legitimate.** When the customer disputes a charge that matches their own recurring pattern (same merchant, same amount, monthly), recommend `CREATE_CASE`, `VERIFY_WITH_CUSTOMER`, and `WARN_CUSTOMER`. Do not block.\n\n**R8. Escalate when uncertain and exposed.** If the verdict is `uncertain` and exposure exceeds $500, or the evidence conflicts, recommend `ESCALATE_TO_ANALYST`.\n\n**R9. Undocumented patterns.** When activity fits none of the known patterns but the evidence shows coordinated or repeated abuse across customers, recommend `CREATE_CASE`, `FILE_REPORT`, and `ESCALATE_TO_ANALYST`, and describe the pattern in your own words. Do not force it into a known category.\n\n**R10. Never `BLOCK_ALL_CARDS`** unless at least two of the customer's cards show confirmed fraud or the customer's credentials are confirmed compromised."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:21",
+      "title": "3a. A case is not a report",
+      "source": "document",
+      "ref": "README#3a.-a-case-is-not-a-report",
+      "text": "### 3a. A case is not a report\n\nTwo different things, and the agent produces both.\n\n**A case** (`CREATE_CASE`) is the bank's internal record of an investigation. Open one whenever fraud probability reaches 0.30, whenever you request evidence, or whenever a customer disputes a charge. A case can be closed as fraud or as legitimate. It can be updated when new evidence arrives. It should be written into the graph so later investigations can find it: a case that names a merchant or a device becomes evidence for the next analyst.\n\n**A suspicious activity report** (`FILE_REPORT`) is a regulatory filing sent outside the bank. File one when fraud is confirmed or strongly suspected **and** at least one of these holds: exposure exceeds $1,000; the activity connects to a shared device profile, a shared region cluster, or another customer's fraud; the pattern is coordinated or undocumented (rule R9). A report always has a case behind it. Most cases never need a report. The report narrative must stand on its own: who, what, when, where, how, and why it is suspicious.\n\nDeciding correctly between \"case only\" and \"case plus report\" is part of the next-best-action score."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:22",
+      "title": "3b. The next best action can change",
+      "source": "document",
+      "ref": "README#3b.-the-next-best-action-can-change",
+      "text": "### 3b. The next best action can change\n\nRecommend what the evidence supports now, then request more evidence if the policy calls for it, then recommend again. Example: probability 0.45 on a single signal, so the initial action is `VERIFY_WITH_CUSTOMER` under R1. The customer denies the transaction. Probability rises, and the final actions become `BLOCK_CARD`, `CREATE_CASE`, and possibly `FILE_REPORT` under R2, with connected cards placed under monitoring. Record both the initial and the final recommendation and what changed between them."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:23",
+      "title": "4. Exposure",
+      "source": "document",
+      "ref": "README#4.-exposure",
+      "text": "### 4. Exposure\n\nExposure is the sum of the absolute amounts of every transaction the agent has identified as part of the fraud episode, including the flagged one. Report it in USD."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:24",
+      "title": "5. Gathering more evidence",
+      "source": "document",
+      "ref": "README#5.-gathering-more-evidence",
+      "text": "### 5. Gathering more evidence\n\nThe agent may, without approval, ask the customer to validate a transaction, request step-up authentication, or request information from an analyst. In this round those responses are not provided. Simulate them in your own system and state the assumption you made in the case file's `evidence_requests`."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:25",
+      "title": "6. Stopping",
+      "source": "document",
+      "ref": "README#6.-stopping",
+      "text": "### 6. Stopping\n\nStop investigating when one of these holds:\n\n- Fraud probability is at or above 0.85, or at or below 0.15, supported by at least two independent pieces of evidence\n- A verification response settles the question\n- Further steps are unlikely to change the decision. Say so in `stop_reason`\n\nInvestigations that continue past a defensible decision waste time. Investigations that stop before one create risk. Both are marked down."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:26",
+      "title": "7. Explaining",
+      "source": "document",
+      "ref": "README#7.-explaining",
+      "text": "### 7. Explaining\n\nEvery recommendation must state what evidence was used, why more evidence was requested if it was, and why the chosen actions follow from this policy. Cite the rule number.\n\n---"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:27",
+      "title": "Answer Format",
+      "source": "document",
+      "ref": "README#answer-format",
+      "text": "# Answer Format\n\nSubmit one JSON file per case, named `<case_id>.json`, for every case in `case_pack.csv`. Twenty cases, twenty files, in a folder called `cases/` in your repository.\n\nEach answer has **three parts**, because that is what a fraud investigation produces:\n\n1. **The case.** The bank's internal record of the investigation: its status, what you concluded, what evidence you found, how far the fraud goes, and which past cases you drew on. Cases are internal. They progress as evidence arrives. Your agent should also write the case into the graph so later investigations can find it; that is the case memory the next investigation retrieves.\n2. **The suspicious activity report (SAR).** The regulatory filing. Not every case needs one. When your agent recommends `FILE_REPORT`, include the report: who, what, when, where, how, and why it is suspicious. This goes to the regulator, so it must stand on its own.\n3. **The next best action.** What the bank should do, with the approval route. Actions evolve: what you recommend before asking the customer may differ from what you recommend after. Record both.\n\nSame structure for every case. Missing fields score zero for that part."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:28",
+      "title": "Fields",
+      "source": "document",
+      "ref": "README#fields",
+      "text": "### Fields\n\n#### Top level\n\n| Field | Type | Meaning |\n|---|---|---|\n| `case_id` | string | From `case_pack.csv` |\n| `case` | object | Part 1, below |\n| `evidence_requests` | list | Each: `type` (`customer_validation` \\| `step_up_auth` \\| `analyst_info`), `asked_after_step` (int), `assumed_response` (string). Empty if you asked for nothing |\n| `next_best_actions` | object | Part 3, below |\n| `sar` | object | Part 2, below |\n| `stop_reason` | string | Why the investigation ended here |\n| `tool_calls` | int | Graph and retrieval calls made for this case |\n| `tokens` | int | LLM tokens consumed for this case |\n| `latency_s` | number | Wall-clock seconds for this case |\n\n#### Part 1: `case`\n\n| Field | Type | Meaning |\n|---|---|---|\n| `status` | `open` \\| `closed_fraud` \\| `closed_legitimate` \\| `escalated` | Where the case stands when your agent stops. `open` means more evidence is still pending |\n| `verdict` | `fraud` \\| `legitimate` \\| `uncertain` | Your conclusion |\n| `fraud_probability` | number 0\u20131 | How likely the flagged activity is fraud. Be honest; this is scored for calibration |\n| `pattern` | enum, see below | The fraud pattern you identified, `undocumented` if it matches none of the known ones, or `none` |\n| `pattern_description` | string | Required when `pattern` is `undocumented`: two or three sentences on what the pattern is, who it affects, and how you found it. Otherwise `\"\"` |\n| `affected_txn_ids` | list of strings | Every transaction you believe is part of the same fraud episode, including the flagged one. Empty if legitimate |\n| `first_suspicious_txn_id` | string or `\"\"` | Where it started |\n| `connected_card_ids` | list of strings | Other cards caught in the same compromise, ring, or device |\n| `connected_device_profiles` | list of strings | Device profiles (DeviceInfo + OS + browser + screen) linking this case to other cards |\n| `exposure_usd` | number | Sum of absolute amounts of `affected_txn_ids` |\n| `evidence` | list of objects | Each: `claim` (string), `source` (`graph` \\| `document` \\| `customer` \\| `external`), `ref` (query name, document section, or request id), `entity_ids` (list of IDs the claim rests on) |\n| `similar_prior_cases` | list of strings | Closed-case IDs from `closed_cases_history.csv` your agent retrieved and used as memory, e.g. `[\"CC-0141\", \"CC-2671\"]`. Empty if none |\n| `summary` | string | Two to six sentences an analyst could read |\n| `written_to_graph` | boolean | Whether your agent stored this case in TigerGraph |\n| `graph_case_id` | string or `\"\"` | The ID of the case vertex you created, if any |\n\n#### Part 2: `sar`\n\n| Field | Type | Meaning |\n|---|---|---|\n| `file` | boolean | Whether a suspicious activity report should be filed. Must agree with whether `FILE_REPORT` appears in your final actions |\n| `reason` | string | Why file, or why not. Cite the policy rule |\n| `narrative` | string | Required when `file` is true. The report itself: **who** (customer, cards, merchants, devices), **what** happened, **when** (dates), **where** (locations, channels), **how** it was carried out, **why** it is suspicious. Six to twelve sentences. This is what a regulator reads |\n| `subjects` | list of strings | IDs of the customers, cards, merchants, and devices named in the narrative |\n| `total_amount_usd` | number | Total of the suspicious activity |\n| `activity_dates` | list of two strings | First and last date of the activity, `YYYY-MM-DD` |\n\nIf `file` is false: `narrative` is `\"\"`, `subjects` is `[]`, `total_amount_usd` is 0, `activity_dates` is `[]`.\n\n#### Part 3: `next_best_actions`\n\n| Field | Type | Meaning |\n|---|---|---|\n| `initial` | list of objects | What you recommended **before** any requested evidence came back. Each: `action` (from the policy), `route` (`auto` \\| `L1` \\| `L2`), `reason` (cite the policy rule) |\n| `final` | list of objects | What you recommend **after** the assumed responses in `evidence_requests`. Same shape. If you requested nothing, `final` equals `initial` |\n| `what_changed` | string | One or two sentences on why `final` differs from `initial`, or `\"nothing\"` |"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:29",
+      "title": "`pattern` values",
+      "source": "document",
+      "ref": "README#`pattern`-values",
+      "text": "### `pattern` values\n\n`card_testing` \u00b7 `card_not_present_fraud` \u00b7 `card_not_present_new_device` \u00b7 `out_of_region_use` \u00b7 `account_takeover` \u00b7 `undocumented` \u00b7 `none`\n\nThe first five are described in the Known Fraud Patterns section above. Use `undocumented` when the evidence shows abuse that fits none of them, and say what you found in `pattern_description`. Finding an undocumented pattern is scored."
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:30",
+      "title": "Example",
+      "source": "document",
+      "ref": "README#example",
+      "text": "### Example\n\n```json\n{\n  \"case_id\": \"HHG-017\",\n  \"case\": {\n    \"status\": \"closed_fraud\",\n    \"verdict\": \"fraud\",\n    \"fraud_probability\": 0.86,\n    \"pattern\": \"card_testing\",\n    \"pattern_description\": \"\",\n    \"affected_txn_ids\": [\"T0412877\", \"T0412878\", \"T0412879\", \"T0412883\"],\n    \"first_suspicious_txn_id\": \"T0412877\",\n    \"connected_card_ids\": [\"C00877-K1\"],\n    \"connected_device_profiles\": [\"SAMSUNG SM-G892A Build/NRD90M | Android 7.0 | samsung browser 6.2 | 2220x1080\"],\n    \"exposure_usd\": 268.43,\n    \"evidence\": [\n      {\n        \"claim\": \"Three online authorizations under $3 within 40 minutes, then a $259 purchase under a product code this card has never used\",\n        \"source\": \"graph\",\n        \"ref\": \"query:card_window(card_id=C00377-K1, hours=2)\",\n        \"entity_ids\": [\"T0412877\", \"T0412878\", \"T0412879\", \"T0412883\"]\n      },\n      {\n        \"claim\": \"All four came from a device profile marked New for this account (Android 7.0, Chrome for Android, 1920x1080), seen on closed case CC-0141 and on card C00877-K1 this month\",\n        \"source\": \"graph\",\n        \"ref\": \"query:device_neighbors(device_id=D000731)\",\n        \"entity_ids\": [\"CC-0141\", \"C00877-K1\"]\n      },\n      {\n        \"claim\": \"Customer denied the purchases when asked\",\n        \"source\": \"customer\",\n        \"ref\": \"evidence_request:1\",\n        \"entity_ids\": []\n      }\n    ],\n    \"similar_prior_cases\": [\"CC-0141\"],\n    \"summary\": \"Textbook card testing: three sub-$3 online authorizations in 40 minutes, then a $259 purchase in a category the cardholder has never used. All four share a device profile marked New for this account, which appears on a closed case from August and on another card this month. Customer denied the activity. Card compromised; a second card is likely compromised through the same device.\",\n    \"written_to_graph\": true,\n    \"graph_case_id\": \"CASE-2016-1187\"\n  },\n  \"evidence_requests\": [\n    { \"type\": \"customer_validation\", \"asked_after_step\": 4, \"assumed_response\": \"Customer states they did not make these purchases and still has the card\" }\n  ],\n  \"next_best_actions\": {\n    \"initial\": [\n      { \"action\": \"DECLINE_TRANSACTION\", \"route\": \"L1\", \"reason\": \"R5: testing sequence observed, purchase already cleared\" },\n      { \"action\": \"VERIFY_WITH_CUSTOMER\", \"route\": \"auto\", \"reason\": \"R1: probability 0.72 on pattern alone, confirm before blocking\" }\n    ],\n    \"final\": [\n      { \"action\": \"BLOCK_CARD\", \"route\": \"L1\", \"reason\": \"R2 and R5: customer denied; exposure $268 is under $2,500\" },\n      { \"action\": \"CREATE_CASE\", \"route\": \"auto\", \"reason\": \"R2\" },\n      { \"action\": \"FILE_REPORT\", \"route\": \"L2\", \"reason\": \"R2: shared device links this to another compromised card\" },\n      { \"action\": \"MONITOR_CONNECTED_CARDS\", \"route\": \"auto\", \"reason\": \"Same device profile also used on C00877-K1\" }\n    ],\n    \"what_changed\": \"Customer denial raised probability from 0.72 to 0.86 and confirmed the block. The shared device profile with C00877-K1 triggers a report and monitoring of the connected card.\"\n  },\n  \"sar\": {\n    \"file\": true,\n    \"reason\": \"R2: confirmed unauthorized use linked by a shared device to a second compromised card\",\n    \"narrative\": \"On 2016-11-14 between 09:12 and 09:52, card C00377-K1 belonging to customer C00377 was used for three online authorizations of $1.10, $2.40, and $0.95 followed at 10:31 by a $259.98 online purchase under a product code the cardholder had never used. All four transactions came from a device profile marked New for this account, previously recorded on closed case CC-0141 (confirmed fraud, August 2016) and on card C00877-K1 on 2016-11-12. The cardholder, contacted the same day, stated they did not make these purchases and remained in possession of the card. The sequence of small authorizations followed by a larger purchase is consistent with testing of a stolen card number prior to use. The shared device indicates a common actor across at least two cardholders. Total unauthorized amount: $268.43. Card blocked and scheduled for reissue; card C00877-K1 placed under monitoring.\",\n    \"subjects\": [\"C00377\", \"C00377-K1\", \"C00877-K1\"],\n    \"total_amount_usd\": 268.43,\n    \"activity_dates\": [\"2016-11-14\", \"2016-11-14\"]\n  },\n  \"stop_reason\": \"Customer denial settled the verdict; device link identified and connected card protected. Further steps would not change the actions.\",\n  \"tool_calls\": 9,\n  \"tokens\": 12480,\n  \"latency_s\": 18.7\n}\n```"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:31",
+      "title": "Notes",
+      "source": "document",
+      "ref": "README#notes",
+      "text": "### Notes\n\n- IDs must be the ones in the dataset. Made-up IDs score zero.\n- For a `legitimate` verdict, `affected_txn_ids` is empty, `exposure_usd` is 0, and `sar.file` is false.\n- `uncertain` is a valid verdict and earns full credit on cases designed to be ambiguous, provided the actions follow policy R1 and R8.\n- The `risk_score` on the flagged transaction is an input, not an answer. Your `fraud_probability` should reflect what you found, and may be far from it.\n- Customer and analyst replies are not provided. State what you assumed in `evidence_requests`, and let `next_best_actions.final` reflect that assumption.\n- Keep `summary` short. The evidence list carries the detail. The SAR narrative is the one place to be complete.\n\n---"
+    },
+    {
+      "document_id": "README",
+      "chunk_id": "README:32",
+      "title": "The 20 Cases",
+      "source": "document",
+      "ref": "README#the-20-cases",
+      "text": "# The 20 Cases\n\nAlso available as `case_pack.csv` in this folder.\n\n| Case | Opened | Trigger | Flagged txn | Card | Customer | Score | Trigger text |\n|---|---|---|---|---|---|---|---|\n| HHG-001 | 2016-12-05 01:55:28 | risk_score | 3514030 | C12382-K1 | C12382 | 0.61 | Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide. |\n| HHG-002 | 2016-11-22 23:27:07 | risk_score | 3478782 | C11891-K1 | C11891 | 0.79 | Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide. |\n| HHG-003 | 2016-12-10 15:01:21 | customer_report | 3530164 | C08623-K2 | C08623 | \u2014 | Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164. |\n| HHG-004 | 2016-12-29 07:53:54 | customer_report | 3583227 | C08106-K1 | C08106 | \u2014 | Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227. |\n| HHG-005 | 2016-12-08 03:38:37 | risk_score | 3523199 | C02923-K1 | C02923 | 0.54 | Real-time model scored transaction 3523199 ($100.07, online) at 0.54. Review and decide. |\n| HHG-006 | 2016-11-22 02:30:00 | customer_report | 3476682 | C07297-K1 | C07297 | \u2014 | Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 3476682. |\n| HHG-007 | 2016-12-05 03:46:14 | risk_score | 3514948 | C09933-K2 | C09933 | 0.87 | Real-time model scored transaction 3514948 ($111.92, in billing region 264.0) at 0.87. Review and decide. |\n| HHG-008 | 2016-12-20 03:08:56 | customer_report | 3558054 | C13171-K2 | C13171 | \u2014 | Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 3558054. |\n| HHG-009 | 2016-12-28 17:10:53 | customer_report | 3581141 | C08299-K1 | C08299 | \u2014 | Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141. |\n| HHG-010 | 2016-12-02 18:18:27 | risk_score | 3506725 | C10434-K1 | C10434 | 0.90 | Real-time model scored transaction 3506725 ($1,000.03, online) at 0.90. Review and decide. |\n| HHG-011 | 2016-12-29 06:27:44 | customer_report | 3583368 | C11923-K2 | C11923 | \u2014 | Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 3583368. |\n| HHG-012 | 2016-12-18 05:00:31 | risk_score | 3553342 | C05876-K2 | C05876 | 0.55 | Real-time model scored transaction 3553342 ($30.91, in billing region 494.0) at 0.55. Review and decide. |\n| HHG-013 | 2016-12-09 05:39:29 | risk_score | 3526826 | C07671-K2 | C07671 | 0.76 | Real-time model scored transaction 3526826 ($35.66, online) at 0.76. Review and decide. |\n| HHG-014 | 2016-11-22 20:11:00 | analyst_request | 3478561 | C13487-K1 | C13487 | \u2014 | Analyst request: several cards this month show purchases from the same unusual device profile. Review transaction 3478561 on card C13487-K1 and look for related activity. |\n| HHG-015 | 2016-11-17 19:03:36 | risk_score | 3464869 | C03042-K1 | C03042 | 0.77 | Real-time model scored transaction 3464869 ($599.94, online) at 0.77. Review and decide. |\n| HHG-016 | 2016-12-12 01:39:08 | customer_report | 3534820 | C09988-K1 | C09988 | \u2014 | Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820. |\n| HHG-017 | 2016-11-12 00:46:24 | risk_score | 3450629 | C04570-K1 | C04570 | 0.57 | Real-time model scored transaction 3450629 ($100.09, online) at 0.57. Review and decide. |\n| HHG-018 | 2016-11-27 14:41:26 | customer_report | 3491361 | C02354-K2 | C02354 | \u2014 | Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361. |\n| HHG-019 | 2016-12-01 22:28:53 | risk_score | 3503878 | C07987-K2 | C07987 | 0.90 | Real-time model scored transaction 3503878 ($99.92, online) at 0.90. Review and decide. |\n| HHG-020 | 2016-12-03 12:04:26 | risk_score | 3509359 | C12265-K2 | C12265 | 0.52 | Real-time model scored transaction 3509359 ($125.08, online) at 0.52. Review and decide. |"
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:1",
+      "title": "Fraud-investigation reasoning rubric",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#fraud-investigation-reasoning-rubric",
+      "text": "# Fraud-investigation reasoning rubric\n\nThis rubric is the human-readable counterpart to `policy.py`. It implements the\nFraud Policy in `README.md`; it does not turn a model risk score into a verdict.\nThe graph/orchestration layer gathers evidence, while the policy layer classifies\nthat evidence and returns the exact action names, approval routes, and JSON field\nvalues required by the answer format."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:2",
+      "title": "Evidence contract and audit trail",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#evidence-contract-and-audit-trail",
+      "text": "## Evidence contract and audit trail\n\nEvery evidence item passed to the policy module has at least these answer-format\nfields: `claim`, `source`, and `entity_ids`. `source` remains one of `graph`,\n`document`, `customer`, or `external` when the item is written to the final case.\nFor reliable automation, the orchestration layer may also attach normalized\n`signals`, such as `card_testing`, `new_device`, `closed_confirmed_fraud_link`,\n`shared_origin`, `customer_denial`, or `customer_confirmation`. The module can\nalso recognize conservative phrases in `claim`, but explicit signals are easier\nto audit.\n\nThe agent should preserve the graph query or document section in the answer\nformat's `evidence[].ref`. It should cite closed-case IDs in\n`similar_prior_cases`; a closed case is evidence, not a substitute for checking\nthe current activity."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:3",
+      "title": "Probability calibration",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#probability-calibration",
+      "text": "## Probability calibration\n\n`calculate_fraud_probability(evidence)` is explainable rather than model-like.\nIt starts at **0.30** and adds the corroboration below. The final value is capped\nat 0.98 and rounded to two decimal places.\n\n| Evidence state | Policy score treatment | Expected band |\n|---|---|---:|\n| Bare risk-score alert or one unusual transaction | Base 0.30 plus up to 0.20 for alert/unusual-history evidence; no uncorroborated case can exceed 0.50 | 0.30\u20130.50 |\n| Recognizable graph pattern | Add 0.25 for a named or undocumented pattern; a new-device CNP pattern adds a further 0.05 | 0.50\u20130.70 |\n| Pattern plus a closed `confirmed_fraud` link | Add 0.18 for a device, region, recipient, or ring link to labeled history | 0.70\u20130.85 |\n| Pattern plus a shared origin across cards | Add 0.30 for a shared device, region, recipient, ring, or multiple-card evidence | 0.85+ |\n| Customer denial | Add 0.30; combined with a pattern this ordinarily reaches 0.85+ | 0.85+ |\n| Customer confirms the transaction | Override the result to 0.10 | <=0.15 |\n\nThis supports **R1** (verify weak evidence below 0.70), **R2** (customer denial\nmaterially changes the assessment), **R5** (the testing sequence is strong\nevidence), and **R8** (uncertain, exposed cases escalate). It is an assessment\nof the complete evidence set, never a copy of `risk_score`."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:4",
+      "title": "Pattern classification",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#pattern-classification",
+      "text": "## Pattern classification\n\n`determine_pattern(evidence)` returns exactly one of the answer-format values:\n`card_testing`, `card_not_present_fraud`, `card_not_present_new_device`,\n`out_of_region_use`, `account_takeover`, `undocumented`, or `none`.\n\n| Returned value | Required facts | README policy basis |\n|---|---|---|\n| `card_testing` | Three or more tiny online authorizations on one card within an hour, then a larger purchase | Known pattern 1; **R5** |\n| `card_not_present_fraud` | Online activity inconsistent with that cardholder's history, normally a short burst rather than one merely unusual purchase | Known pattern 2 |\n| `card_not_present_new_device` | Card-not-present evidence plus a device marked `New` for the account; proxy evidence can strengthen it | Known pattern 3 |\n| `out_of_region_use` | Card-present use in a new billing region while normal home activity continues; do not call a multi-day trip a clone without more evidence | Known pattern 4; **R2\u2013R3** |\n| `account_takeover` | Mixed-channel inconsistency together with device, match-flag, or credential anomalies | Known pattern 5; **R10** may matter if credentials are confirmed compromised |\n| `undocumented` | Coordinated or repeated abuse across customers/cards that genuinely fits none of the five named patterns | **R9** |\n| `none` | The supplied evidence does not support a pattern | **R1** and **R8** determine the safe next step |\n\nExplicit normalized signals take priority. In particular, the more specific\n`card_not_present_new_device` wins over generic card-not-present fraud. The\nagent must not force unusual activity into a named pattern simply to obtain a\nmore decisive action."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:5",
+      "title": "When to stop",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#when-to-stop",
+      "text": "## When to stop\n\n`should_stop(probability, evidence, verification_response)` stops only when a\nFraud Policy Section 6 condition is met:\n\n1. Fraud probability is at least 0.85 and there are two or more independent\n   evidence items.\n2. Fraud probability is at most 0.15 and there are two or more independent\n   evidence items.\n3. A customer/verification response expressly denies or confirms the activity.\n4. The evidence expressly records that further steps are unlikely to change the\n   decision.\n\nIndependent items are distinct `source`/`claim` pairs. Repeating the same graph\nfinding twice does not create independent corroboration. If none of these\nconditions hold, keep the case open or escalate/request evidence as the rules\nbelow require, and write the returned explanation to `stop_reason`."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:6",
+      "title": "Action decision table",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#action-decision-table",
+      "text": "## Action decision table\n\nThe `next_best_actions.initial` and `next_best_actions.final` arrays use objects\nwith exactly `action`, `route`, and `reason`. Action identifiers and routes are\nnot renamed. `auto` actions may be executed by the agent; `L1` and `L2` actions\nare recommendations awaiting human approval.\n\n| Rule | Decision | Exact action(s) and route |\n|---|---|---|\n| **R1** | Single weak signal and probability below 0.70 | `VERIFY_WITH_CUSTOMER` / `auto` before a block. For a testing sequence, this still applies to any block not independently supported by R5. |\n| **R2** | Customer denies the transaction | `BLOCK_CARD` / `L1` if exposure is <= $2,500, otherwise `L2`; `CREATE_CASE` / `auto`. Add `FILE_REPORT` / `L2` when exposure exceeds $1,000 or there is a shared origin/related card. |\n| **R3** | Customer confirms the transaction | `CLOSE_NO_FRAUD` / `auto`. |\n| **R4** | No reply within 24 hours | `MONITOR_CARD` / `auto` and `DECLINE_TRANSACTION` / `L1` for pending authorizations. Add `ESCALATE_TO_ANALYST` / `auto` when exposure exceeds $500. |\n| **R5** | Three-plus small online authorizations followed by a larger purchase | `DECLINE_TRANSACTION` / `L1` and `STEP_UP_AUTH` / `auto`. If a purchase above $100 cleared, add `BLOCK_CARD` / `L1` when exposure is <= $2,500, otherwise `L2`. |\n| **R6** | Several cards share a fraud origin (device, region, recipient, or ring) | `CREATE_CASE` / `auto`, `FILE_REPORT` / `L2`, and `MONITOR_CONNECTED_CARDS` / `auto` after fraud is confirmed or strongly suspected. Name the shared element in evidence. |\n| **R7** | Customer disputes a charge matching their own recurring merchant/amount/cadence | `CREATE_CASE` / `auto`, `VERIFY_WITH_CUSTOMER` / `auto`, and `WARN_CUSTOMER` / `auto`. Do not block. |\n| **R8** | Verdict is `uncertain` and exposure exceeds $500, or evidence conflicts | `ESCALATE_TO_ANALYST` / `auto`. |\n| **R9** | Coordinated abuse fits no named pattern | `CREATE_CASE` / `auto`, `FILE_REPORT` / `L2`, and `ESCALATE_TO_ANALYST` / `auto`; return `undocumented` and explain it in `pattern_description`. |\n| **R10** | At least two cards have confirmed fraud, or credentials are confirmed compromised | `BLOCK_ALL_CARDS` / `L2` is permitted. It must never be recommended otherwise. |\n\nThere are several general safeguards:\n\n- Under Section 3a, create an internal case whenever probability reaches 0.30,\n  the agent requests evidence, or a customer disputes a charge.\n- `BLOCK_CARD` is `L1` through $2,500 exposure and `L2` above that amount.\n- `DECLINE_TRANSACTION` is always `L1`; `FILE_REPORT` and\n  `BLOCK_ALL_CARDS` are always `L2`.\n- `ALLOW_TRANSACTION`, `MONITOR_CARD`, `MONITOR_CONNECTED_CARDS`,\n  `WARN_CUSTOMER`, `VERIFY_WITH_CUSTOMER`, `STEP_UP_AUTH`,\n  `GENERATE_REPORT`, `CREATE_CASE`, `ESCALATE_TO_ANALYST`, and\n  `CLOSE_NO_FRAUD` use `auto`."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:7",
+      "title": "SAR decision and narrative",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#sar-decision-and-narrative",
+      "text": "## SAR decision and narrative\n\n`should_file_sar(verdict, probability, exposure_usd, shared_device_or_region,\npattern)` implements **R6**, **R9**, and Policy Section **3a**. A SAR is filed\nonly if fraud is confirmed (`verdict == \"fraud\"`) or strongly suspected\n(probability >= 0.85), and at least one of these applies:\n\n- exposure is greater than $1,000;\n- it connects to a shared device, region, or related card/ring (**R6**); or\n- the activity is coordinated or `undocumented` (**R9**).\n\nOtherwise the agent can still create a case; a case and a SAR are different\ndeliverables. `sar.file` must agree with the presence of `FILE_REPORT` in the\nfinal action list. When false, the answer format requires `sar.narrative` to be\n`\"\"`, `sar.subjects` to be `[]`, `sar.total_amount_usd` to be `0`, and\n`sar.activity_dates` to be `[]`.\n\n`build_sar_narrative(case_data)` writes nine factual sentences, satisfying the\nrequired six-to-twelve sentence range. It only names fields supplied by the\ncaller and deliberately says `not supplied` when a required fact is absent\nrather than inventing details. Supply these fields to make the narrative useful:\n\n```text\ncustomer_id, card_ids, activity_dates, total_amount_usd,\nchannels, billing_regions, connected_device_profiles, pattern,\nactivity_description, evidence_summary, why_suspicious\n```\n\nThe narrative sequence is: who (customer/cards), what (activity), when (dates),\nwhere (channel/region), amount, pattern/how, device/ring connection, evidence,\nand why suspicious. The final answer places it in `sar.narrative`, with actual\nsubject IDs in `sar.subjects`, the episode total in `sar.total_amount_usd`, and\nthe first/last dates in `sar.activity_dates`."
+    },
+    {
+      "document_id": "fraud_reasoning_rubric",
+      "chunk_id": "fraud_reasoning_rubric:8",
+      "title": "Answer-format handoff checklist",
+      "source": "document",
+      "ref": "fraud_reasoning_rubric#answer-format-handoff-checklist",
+      "text": "## Answer-format handoff checklist\n\nThe policy module does not create files or graph vertices. The orchestration\nlayer maps its outputs into the exact top-level answer schema:\n\n```text\ncase_id, case, evidence_requests, next_best_actions, sar,\nstop_reason, tool_calls, tokens, latency_s\n```\n\nFor `case`, retain the exact fields `status`, `verdict`, `fraud_probability`,\n`pattern`, `pattern_description`, `affected_txn_ids`,\n`first_suspicious_txn_id`, `connected_card_ids`,\n`connected_device_profiles`, `exposure_usd`, `evidence`,\n`similar_prior_cases`, `summary`, `written_to_graph`, and `graph_case_id`.\nFor `next_best_actions`, write the policy output into `initial` and `final`,\nthen explain evidence-driven changes in `what_changed`. A legitimate case has\nempty `affected_txn_ids`, `exposure_usd` of 0, and no SAR."
+    }
+  ],
+  "external_sources": [
+    {
+      "source": "external",
+      "url": "https://www.fincen.gov/system/files/shared/sar_guidance_narrative.pdf",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2011-a016",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://www.fincen.gov/system/files/shared/FTA_Identity_Final508.pdf",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Illicit-financial-flows-cyber-enabled-fraud.pdf.coredownload.inline.pdf",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://bsaaml.ffiec.gov/manual/Appendices/07",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04",
+      "status": "download_required"
+    },
+    {
+      "source": "external",
+      "url": "https://www.treasury.gov/ofac/downloads/sdnlist.pdf",
+      "status": "download_required"
+    }
+  ]
+}
